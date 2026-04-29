@@ -1,6 +1,6 @@
 import { BlobElementEntity, ElementEntity, ListElementEntity, SomeEntity, TypeModel } from "../../common/EntityTypes.js"
 import { EntityRestClient, typeRefToPath } from "./EntityRestClient.js"
-import { firstBiggerThanSecond, getElementId, getListId } from "../../common/utils/EntityUtils.js"
+import { firstBiggerThanSecond, getElementId, getListId, removeTechnicalFields } from "../../common/utils/EntityUtils.js"
 import { CacheStorage, LastUpdateTime } from "./DefaultEntityRestCache.js"
 import { assertNotNull, clone, getFromMap, remove, TypeRef } from "@tutao/tutanota-utils"
 import { CustomCacheHandlerMap } from "./CustomCacheHandler.js"
@@ -115,6 +115,7 @@ export class EphemeralCacheStorage implements CacheStorage {
 
 	async put(originalEntity: SomeEntity): Promise<void> {
 		const entity = clone(originalEntity)
+		removeTechnicalFields(entity)
 		const typeRef = entity._type
 		const typeModel = await resolveTypeReference(typeRef)
 		switch (typeModel.type) {
