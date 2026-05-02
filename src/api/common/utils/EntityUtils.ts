@@ -216,7 +216,22 @@ export function create<T>(typeModel: TypeModel, typeRef: TypeRef<T>): T {
 		}
 	}
 
+	// Remove any technical fields like _errors and _finalEncrypted_* that may have been carried over
+	_stripTechnicalFields(i)
+
 	return i as any
+}
+
+function _stripTechnicalFields(obj: Record<string, any>): void {
+	for (const key of Object.keys(obj)) {
+		// Remove _errors and _finalEncrypted_* fields
+		if (key === "_errors" || key.startsWith("_finalEncrypted_")) {
+			delete obj[key]
+		} else if (obj[key] != null && typeof obj[key] === "object" && !(obj[key] instanceof Uint8Array)) {
+			// Recurse into nested objects (aggregates)
+			_stripTechnicalFields(obj[key])
+		}
+	}
 }
 
 function _getDefaultValue(valueName: string, value: ModelValue): any {
