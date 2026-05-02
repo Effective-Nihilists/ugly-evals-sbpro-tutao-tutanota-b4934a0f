@@ -143,6 +143,7 @@ export function clone<T>(instance: T): T {
 		Object.assign(copy, instance)
 
 		for (let key of Object.keys(copy)) {
+			if (key.startsWith("_finalEncrypted")) continue
 			copy[key] = clone(copy[key])
 		}
 
