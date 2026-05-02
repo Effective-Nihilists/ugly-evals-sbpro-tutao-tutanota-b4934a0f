@@ -334,3 +334,25 @@ export function assertIsEntity<T extends SomeEntity>(entity: SomeEntity, type: T
 export function assertIsEntity2<T extends SomeEntity>(type: TypeRef<T>): (entity: SomeEntity) => entity is T {
 	return (e): e is T => assertIsEntity(e, type)
 }
+
+/**
+ * Removes technical fields from the given entity. Mutates the entity.
+ * Currently this means fields whose names start with `_finalEncrypted`, both
+ * at the top level of the entity and inside any nested aggregate entities.
+ */
+export function removeTechnicalFields<T extends SomeEntity>(entity: T) {
+	_removeTechnicalFields(entity)
+}
+
+function _removeTechnicalFields(obj: Record<string, any>) {
+	for (const key of Object.keys(obj)) {
+		if (key.startsWith("_finalEncrypted")) {
+			delete obj[key]
+		} else {
+			const value = obj[key]
+			if (value != null && typeof value === "object" && !(value instanceof TypeRef) && !(value instanceof Date) && !(value instanceof Uint8Array)) {
+				_removeTechnicalFields(value)
+			}
+		}
+	}
+}
