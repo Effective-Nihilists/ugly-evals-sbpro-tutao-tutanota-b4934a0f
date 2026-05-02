@@ -334,3 +334,28 @@ export function assertIsEntity<T extends SomeEntity>(entity: SomeEntity, type: T
 export function assertIsEntity2<T extends SomeEntity>(type: TypeRef<T>): (entity: SomeEntity) => entity is T {
 	return (e): e is T => assertIsEntity(e, type)
 }
+
+export function removeTechnicalFields(entity: ElementEntity): void {
+	_removeTechnicalFieldsRecursive(entity)
+}
+
+function _removeTechnicalFieldsRecursive(obj: any): void {
+	if (!obj || typeof obj !== "object") {
+		return
+	}
+
+	if (Array.isArray(obj)) {
+		for (const item of obj) {
+			_removeTechnicalFieldsRecursive(item)
+		}
+		return
+	}
+
+	for (const key of Object.keys(obj)) {
+		if (key.startsWith("_finalEncrypted") || key.startsWith("_defaultEncrypted")) {
+			delete obj[key]
+		} else {
+			_removeTechnicalFieldsRecursive(obj[key])
+		}
+	}
+}
