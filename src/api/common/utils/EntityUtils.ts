@@ -334,3 +334,16 @@ export function assertIsEntity<T extends SomeEntity>(entity: SomeEntity, type: T
 export function assertIsEntity2<T extends SomeEntity>(type: TypeRef<T>): (entity: SomeEntity) => entity is T {
 	return (e): e is T => assertIsEntity(e, type)
 }
+
+export function removeTechnicalFields(entity: ElementEntity): void {
+	for (const key of Object.keys(entity)) {
+		if (key.startsWith("_finalEncrypted")) {
+			delete (entity as Record<string, unknown>)[key]
+		} else {
+			const value = (entity as Record<string, unknown>)[key]
+			if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+				removeTechnicalFields(value as ElementEntity)
+			}
+		}
+	}
+}
